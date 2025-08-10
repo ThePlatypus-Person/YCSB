@@ -112,7 +112,8 @@ DATABASES = {
  '''
 DATABASES = {
     "paxi"          : "site.ycsb.paxi.PaxiClient",
-    "zookeeper"     : "site.ycsb.db.zookeeper.ZKClient"
+    "zookeeper"     : "site.ycsb.db.zookeeper.ZKClient",
+    "hraftd"        : "site.ycsb.db.HraftdClient",
 }
 
 OPTIONS = {

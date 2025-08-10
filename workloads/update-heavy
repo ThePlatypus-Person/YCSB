@@ -37,3 +37,4 @@ insertproportion=0
 requestdistribution=zipfian
 
 rest.endpoint=http://localhost:8080
+hraftd.hosts=http://localhost:11001
