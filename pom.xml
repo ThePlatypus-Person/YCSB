@@ -168,6 +168,7 @@ LICENSE file.
     <module>paxi</module>
     <module>zookeeper</module>
     <module>hraftd</module>
+    <module>etcd</module>
   </modules>
 
   <build>

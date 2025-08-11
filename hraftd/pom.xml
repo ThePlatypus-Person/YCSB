@@ -21,4 +21,20 @@
       <scope>provided</scope>
     </dependency>
   </dependencies>
-</project>
+
+  <!-- <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>2.16</version>
+        <executions>
+          <execution>
+            <id>validate</id>
+            <phase>none</phase>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build> -->
+</project>  
