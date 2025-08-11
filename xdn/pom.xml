@@ -1,0 +1,52 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 
+  http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+<modelVersion>4.0.0</modelVersion>
+
+<groupId>site.ycsb</groupId>
+<artifactId>xdn-binding</artifactId>
+<version>0.18.0-SNAPSHOT</version>
+<packaging>jar</packaging>
+
+<name>YCSB XDN Binding</name>
+
+<dependencies>
+  <dependency>
+    <groupId>site.ycsb</groupId>
+    <artifactId>core</artifactId>
+    <version>${project.version}</version>
+    <scope>provided</scope>
+  </dependency>
+</dependencies>
+
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.rat</groupId>
+      <artifactId>apache-rat-plugin</artifactId>
+      <version>0.12</version>
+      <configuration>
+        <excludes>
+          <exclude>src/test/resources/error_trace.txt</exclude>
+          <exclude>src/test/resources/trace.txt</exclude>
+        </excludes>
+      </configuration>
+    </plugin>
+
+
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.8.1</version>
+      <configuration>
+        <source>21</source>
+        <target>21</target>
+      </configuration>
+    </plugin>
+
+  </plugins>
+</build>
+
+</project>
