@@ -1,5 +1,6 @@
 package site.ycsb.restkv;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import site.ycsb.*;
 import java.io.*;
 import java.net.*;
@@ -8,6 +9,7 @@ import java.util.*;
 
 
 public class RestKVClient extends DB {
+  private static final ObjectMapper objectMapper = new ObjectMapper();
   int TIMEOUT_DURATION = 3000;
 
   public RestKVClient() {
@@ -67,12 +69,9 @@ public class RestKVClient extends DB {
     }
   }
 
-  private String escapeJson(String s) {
-    return s.replace("\\", "\\\\").replace("\"", "\\\"");
-  }
-
   @Override
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
+    String output = "";
     try {
       URL url = URI.create(String.format("%s/api/kv/%s", endpoint, key)).toURL();
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
@@ -82,10 +81,15 @@ public class RestKVClient extends DB {
       conn.setConnectTimeout(TIMEOUT_DURATION);
       conn.setReadTimeout(TIMEOUT_DURATION);
 
-      String value = values.toString();
-      String jsonBody = String.format("{\"key\": \"%s\", \"value\": \"%s\"}", key, escapeJson(value));
+      String rawValue = values.toString();
+      String encoded = Base64.getEncoder().encodeToString(rawValue.getBytes(StandardCharsets.UTF_8));
+      Map<String, String> body = new HashMap<>();
+      body.put("key", key);
+      body.put("value", encoded);
+      String jsonBody = objectMapper.writeValueAsString(body);
+      output = jsonBody;
 
-      System.out.printf("Insert %s: %s\n", url, value);
+      System.out.printf("Insert %s: %s\n", url, jsonBody);
       try (OutputStream os = conn.getOutputStream()) {
         os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
         os.flush();
@@ -95,6 +99,9 @@ public class RestKVClient extends DB {
       return (responseCode == 200 || responseCode == 201) ? Status.OK : Status.ERROR;
 
     } catch (Exception e) {
+      String url = String.format("%s/api/kv/%s", endpoint, key);
+      System.out.printf("FAILED Insert %s: %s\n", url, output);
+
       e.printStackTrace();
       return Status.ERROR;
     }
@@ -130,10 +137,14 @@ public class RestKVClient extends DB {
       conn.setConnectTimeout(TIMEOUT_DURATION);
       conn.setReadTimeout(TIMEOUT_DURATION);
 
-      String value = values.toString();
-      String jsonBody = String.format("{\"key\": \"%s\", \"value\": \"%s\"}", key, escapeJson(value));
+      String rawValue = values.toString();
+      String encoded = Base64.getEncoder().encodeToString(rawValue.getBytes(StandardCharsets.UTF_8));
+      Map<String, String> body = new HashMap<>();
+      body.put("key", key);
+      body.put("value", encoded);
+      String jsonBody = objectMapper.writeValueAsString(body);
 
-      System.out.printf("Update %s: %s\n", url, value);
+      System.out.printf("Update %s: %s\n", url, jsonBody);
       try (OutputStream os = conn.getOutputStream()) {
         os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
         os.flush();
