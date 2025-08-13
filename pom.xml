@@ -157,6 +157,7 @@ LICENSE file.
     -->
     <zookeeper.version>3.5.8</zookeeper.version>
     <paxi.version>1.0.0</paxi.version>
+    <xdn.version>1.0.0</xdn.version>
   </properties>
 
   <modules>
@@ -166,9 +167,9 @@ LICENSE file.
     <module>distribution</module>
     <!-- all the datastore bindings, lex sorted please -->
     <module>paxi</module>
-    <module>zookeeper</module>
     <module>hraftd</module>
-    <module>etcd</module>
+    <module>xdn</module>
+    <module>zookeeper</module>
   </modules>
 
   <build>

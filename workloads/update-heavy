@@ -38,3 +38,4 @@ requestdistribution=zipfian
 
 rest.endpoint=http://localhost:8080
 hraftd.hosts=http://localhost:11001
+xdn.restkv.endpoint=http://restkv.xdnapp.com:2301
