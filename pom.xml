@@ -168,6 +168,7 @@ LICENSE file.
     <!-- all the datastore bindings, lex sorted please -->
     <module>paxi</module>
     <module>hraftd</module>
+    <module>tikv</module>
     <module>xdn</module>
     <module>zookeeper</module>
   </modules>

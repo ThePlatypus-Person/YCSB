@@ -115,6 +115,7 @@ DATABASES = {
     "zookeeper"     : "site.ycsb.db.zookeeper.ZKClient",
     "hraftd"        : "site.ycsb.db.HraftdClient",
     "xdn"           : "site.ycsb.restkv.RestKVClient",
+    "tikv"          : "site.ycsb.tikv.TikvClient",
     "etcd"          : "site.ycsb.etcd.EtcdClient",
 }
 
