@@ -170,6 +170,7 @@ LICENSE file.
     <module>paxi</module>
     <module>hraftd</module>
     <module>holipaxos</module>
+    <module>tikv</module>
     <module>xdn</module>
     <module>zookeeper</module>
     <module>chainpaxos</module>

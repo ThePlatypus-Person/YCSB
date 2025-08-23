@@ -6,11 +6,11 @@
 <modelVersion>4.0.0</modelVersion>
 
 <groupId>site.ycsb</groupId>
-<artifactId>xdn-binding</artifactId>
+<artifactId>tikv-binding</artifactId>
 <version>0.18.0-SNAPSHOT</version>
 <packaging>jar</packaging>
 
-<name>YCSB XDN Binding</name>
+<name>YCSB tikv Binding</name>
 
 <dependencies>
   <dependency>
@@ -19,10 +19,19 @@
     <version>${project.version}</version>
     <scope>provided</scope>
   </dependency>
+
+  <!-- TiKV Java client -->
   <dependency>
-    <groupId>com.fasterxml.jackson.core</groupId>
-    <artifactId>jackson-databind</artifactId>
-    <version>2.17.0</version> <!-- or latest -->
+    <groupId>org.tikv</groupId>
+    <artifactId>tikv-client-java</artifactId>
+    <version>3.3.0</version>
+  </dependency>
+
+  <!-- Logging backend (SLF4J + Simple) -->
+  <dependency>
+    <groupId>org.slf4j</groupId>
+    <artifactId>slf4j-simple</artifactId>
+    <version>2.0.16</version>
   </dependency>
 </dependencies>
 
