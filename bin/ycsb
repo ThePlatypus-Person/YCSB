@@ -116,6 +116,8 @@ DATABASES = {
     "hraftd"        : "site.ycsb.db.HraftdClient",
     "xdn"           : "site.ycsb.restkv.RestKVClient",
     "etcd"          : "site.ycsb.etcd.EtcdClient",
+    "chainpaxos"    : "site.ycsb.chainpaxos.ChainPaxosClient",
+    "holipaxos"    : "site.ycsb.holipaxos.HolipaxosClient",
 }
 
 OPTIONS = {

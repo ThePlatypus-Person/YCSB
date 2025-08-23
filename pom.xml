@@ -157,6 +157,7 @@ LICENSE file.
     -->
     <zookeeper.version>3.5.8</zookeeper.version>
     <paxi.version>1.0.0</paxi.version>
+    <holipaxos.version>1.0.0</holipaxos.version>
     <xdn.version>1.0.0</xdn.version>
   </properties>
 
@@ -168,8 +169,10 @@ LICENSE file.
     <!-- all the datastore bindings, lex sorted please -->
     <module>paxi</module>
     <module>hraftd</module>
+    <module>holipaxos</module>
     <module>xdn</module>
     <module>zookeeper</module>
+    <module>chainpaxos</module>
   </modules>
 
   <build>
