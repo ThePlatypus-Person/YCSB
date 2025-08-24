@@ -6,6 +6,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.net.URLEncoder;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -80,7 +83,9 @@ public class HolipaxosClient extends DB {
         return Status.NOT_FOUND;
       }
       
-      result.put("field0", new StringByteIterator(response));
+      // URL decode the value since we URL encoded it during insert
+      String decodedValue = URLDecoder.decode(response, StandardCharsets.UTF_8);
+      result.put("field0", new StringByteIterator(decodedValue));
       return Status.OK;
       
     } catch (Exception e) {
@@ -93,14 +98,14 @@ public class HolipaxosClient extends DB {
     // System.out.println("insert() called with key: " + key);
     StringBuilder value = new StringBuilder();
     for (ByteIterator v : values.values()) {
-      if (value.length() > 0) {
-        value.append(" ");
-      }
+      // Don't add spaces between field values to avoid parser issues
       value.append(v.toString());
     }
     
     try {
-      executeWriteWithRetry("put " + key + " " + value.toString());
+      // URL encode the value to avoid any parsing issues with special characters
+      String encodedValue = URLEncoder.encode(value.toString(), StandardCharsets.UTF_8);
+      executeWriteWithRetry("put " + key + " " + encodedValue);
       return Status.OK;
     } catch (Exception e) {
       return Status.ERROR;
@@ -243,8 +248,13 @@ public class HolipaxosClient extends DB {
       try {
         String response = in.readLine();
         
-        if (response != null && !response.trim().isEmpty()) {
+        if (response != null) {
           response = response.trim();
+          
+          if (response.isEmpty()) {
+            // Empty response = success for writes
+            return;
+          }
           
           if (response.equals("retry")) {
             throw new Exception("Server busy");
