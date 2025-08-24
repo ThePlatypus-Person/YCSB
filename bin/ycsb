@@ -117,8 +117,7 @@ DATABASES = {
     "xdn"           : "site.ycsb.restkv.RestKVClient",
     "tikv"          : "site.ycsb.tikv.TikvClient",
     "etcd"          : "site.ycsb.etcd.EtcdClient",
-    "chainpaxos"    : "site.ycsb.chainpaxos.ChainPaxosClient",
-    "holipaxos"    : "site.ycsb.holipaxos.HolipaxosClient",
+    "holipaxos"     : "site.ycsb.holipaxos.HolipaxosClient",
 }
 
 OPTIONS = {
