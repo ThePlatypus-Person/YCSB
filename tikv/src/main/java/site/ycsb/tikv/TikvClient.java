@@ -12,6 +12,9 @@ import org.tikv.common.TiSession;
 import java.util.Optional;
 
 public class TikvClient extends DB {
+  private static final String CLIENT_CONNECT = "tikv.clientConnect";
+  private static final String DEFAULT_CLIENT_CONNECT = "127.0.0.1:2379";
+
   private TiSession session;
   private RawKVClient client;
 
@@ -21,7 +24,14 @@ public class TikvClient extends DB {
 
   @Override
   public void init() throws DBException {
-    TiConfiguration conf = TiConfiguration.createDefault("127.0.0.1:2379");
+    Properties props = getProperties();
+
+    String connectString = props.getProperty(CLIENT_CONNECT);
+    if (connectString == null || connectString.length() == 0) {
+      connectString = DEFAULT_CLIENT_CONNECT;
+    }
+
+    TiConfiguration conf = TiConfiguration.createDefault(connectString);
     this.session = TiSession.create(conf);
     this.client = session.createRawClient();
   }
