@@ -6,8 +6,8 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
-import java.net.URLEncoder;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
@@ -29,8 +29,7 @@ import site.ycsb.StringByteIterator;
 public class HolipaxosClient extends DB {
   
   private static final String HOSTS_PROPERTY = "holipaxos.hosts";
-  private static final String DEFAULT_HOSTS = "localhost:10001,localhost:11001,localhost:12001,"
-      + "localhost:13001,localhost:14001";
+  private static final String DEFAULT_HOSTS = "54.242.124.204:2201,3.91.50.94:2211,3.88.202.240:2221";
   private static final String TIMEOUT_PROPERTY = "holipaxos.timeout";
   private static final int DEFAULT_TIMEOUT_MS = 5000;
   
@@ -62,7 +61,7 @@ public class HolipaxosClient extends DB {
   
   @Override
   public void cleanup() throws DBException {
-    // System.out.println("cleanup() called");
+    System.out.println("cleanup() called");
     if (socket != null && !socket.isClosed()) {
       try {
         socket.close();
@@ -75,7 +74,7 @@ public class HolipaxosClient extends DB {
   @Override
   public Status read(String table, String key, Set<String> fields, 
                      Map<String, ByteIterator> result) {
-    // System.out.println("read() called with key: " + key);
+    System.out.println("read() called with key: " + key);
     try {
       String response = executeWithRetry("get " + key);
       
@@ -83,8 +82,7 @@ public class HolipaxosClient extends DB {
         return Status.NOT_FOUND;
       }
       
-      // URL decode the value since we URL encoded it during insert
-      String decodedValue = URLDecoder.decode(response, StandardCharsets.UTF_8);
+      String decodedValue = URLDecoder.decode(response, StandardCharsets.UTF_8.name());
       result.put("field0", new StringByteIterator(decodedValue));
       return Status.OK;
       
@@ -95,7 +93,7 @@ public class HolipaxosClient extends DB {
   
   @Override
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
-    // System.out.println("insert() called with key: " + key);
+    System.out.println("insert() called with key: " + key);
     StringBuilder value = new StringBuilder();
     for (ByteIterator v : values.values()) {
       // Don't add spaces between field values to avoid parser issues
@@ -104,7 +102,7 @@ public class HolipaxosClient extends DB {
     
     try {
       // URL encode the value to avoid any parsing issues with special characters
-      String encodedValue = URLEncoder.encode(value.toString(), StandardCharsets.UTF_8);
+      String encodedValue = URLEncoder.encode(value.toString(), StandardCharsets.UTF_8.name());
       executeWriteWithRetry("put " + key + " " + encodedValue);
       return Status.OK;
     } catch (Exception e) {
@@ -114,13 +112,13 @@ public class HolipaxosClient extends DB {
   
   @Override
   public Status update(String table, String key, Map<String, ByteIterator> values) {
-    // System.out.println("update() called with key: " + key);
+    System.out.println("update() called with key: " + key);
     return insert(table, key, values);
   }
   
   @Override
   public Status delete(String table, String key) {
-    // System.out.println("delete() called with key: " + key);
+    System.out.println("delete() called with key: " + key);
     try {
       executeWriteWithRetry("del " + key);
       return Status.OK;
@@ -136,7 +134,10 @@ public class HolipaxosClient extends DB {
   }
   
   private void connect() throws DBException {
+
+    System.out.println("Flag 1 : Connecting to HoliPaxos node " + currentHost);
     if (socket != null && !socket.isClosed()) {
+      System.out.println("Closing existing socket");
       try {
         socket.close();
       } catch (IOException e) {
@@ -144,23 +145,27 @@ public class HolipaxosClient extends DB {
       }
     }
     
+    System.out.println("Flag 2 : Connecting to HoliPaxos node " + currentHost);
     for (int i = 0; i < hosts.length; i++) {
       String[] parts = hosts[currentHost].split(":");
       String host = parts[0];
       int port = Integer.parseInt(parts[1]);
       
+      System.out.println("Trying to connect to " + host + ":" + port);
       try {
         socket = new Socket(host, port);
         socket.setSoTimeout(timeoutMs);
         out = new PrintWriter(socket.getOutputStream(), true);
         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        // System.out.println("Connected to HoliPaxos node " + currentHost);
         return;
-        
       } catch (IOException e) {
         currentHost = (currentHost + 1) % hosts.length;
+        System.out.println("Failed to connect to " + host + ":" + port + ", trying next node");
       }
     }
-    
+
+    System.out.println("Failed to connect to any HoliPaxos node");
     throw new DBException("Cannot connect to any HoliPaxos node");
   }
   
@@ -287,8 +292,10 @@ public class HolipaxosClient extends DB {
       try {
         int leaderId = Integer.parseInt(parts[2]);
         if (leaderId >= 0 && leaderId < hosts.length) {
-          currentHost = leaderId;
-          connect();
+          if (leaderId != currentHost) {
+            currentHost = leaderId;
+            connect();
+          }
         }
       } catch (NumberFormatException e) {
         // Invalid leader ID, ignore
