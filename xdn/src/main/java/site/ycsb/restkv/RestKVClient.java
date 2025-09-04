@@ -20,7 +20,7 @@ public class RestKVClient extends DB {
 
   @Override
   public void init() throws DBException {
-    endpoint = getProperties().getProperty("xdn.restkv.endpoint", "http://restkv.xdnapp.com:2301");
+    endpoint = getProperties().getProperty("xdn.restkv.endpoint", "http://restkv.xdnapp.com:2300");
   }
 
   @Override
@@ -32,6 +32,7 @@ public class RestKVClient extends DB {
       System.out.printf("Read %s\n", uri.toURL());
       conn = (HttpURLConnection) uri.toURL().openConnection();
       conn.setRequestMethod("GET");
+      conn.setRequestProperty("XDN", "restkv");
       conn.setConnectTimeout(TIMEOUT_DURATION);
       conn.setReadTimeout(TIMEOUT_DURATION);
 
@@ -76,8 +77,9 @@ public class RestKVClient extends DB {
       URL url = URI.create(String.format("%s/api/kv/%s", endpoint, key)).toURL();
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("POST");
-      conn.setDoOutput(true);
+      conn.setRequestProperty("XDN", "restkv");
       conn.setRequestProperty("Content-Type", "application/json");
+      conn.setDoOutput(true);
       conn.setConnectTimeout(TIMEOUT_DURATION);
       conn.setReadTimeout(TIMEOUT_DURATION);
 
@@ -114,6 +116,7 @@ public class RestKVClient extends DB {
       System.out.printf("Delete %s\n", url);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("DELETE");
+      conn.setRequestProperty("XDN", "restkv");
       conn.setConnectTimeout(TIMEOUT_DURATION);
       conn.setReadTimeout(TIMEOUT_DURATION);
 
@@ -132,6 +135,7 @@ public class RestKVClient extends DB {
       URL url = URI.create(String.format("%s/api/kv/%s", endpoint, key)).toURL();
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("POST");
+      conn.setRequestProperty("XDN", "restkv");
       conn.setDoOutput(true);
       conn.setRequestProperty("Content-Type", "application/json");
       conn.setConnectTimeout(TIMEOUT_DURATION);
