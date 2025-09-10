@@ -29,7 +29,7 @@ import site.ycsb.StringByteIterator;
 public class HolipaxosClient extends DB {
   
   private static final String HOSTS_PROPERTY = "holipaxos.hosts";
-  private static final String DEFAULT_HOSTS = "54.242.124.204:2201,3.91.50.94:2211,3.88.202.240:2221";
+  private static final String DEFAULT_HOSTS = "127.0.0.1:2001,127.0.0.1:2211,127.0.0.1:2221";
   private static final String TIMEOUT_PROPERTY = "holipaxos.timeout";
   private static final int DEFAULT_TIMEOUT_MS = 5000;
   
