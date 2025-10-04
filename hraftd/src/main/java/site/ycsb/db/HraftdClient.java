@@ -28,7 +28,7 @@ public class HraftdClient extends DB {
   
   private static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
   private static String[] hosts;
-  private static final AtomicInteger HOST_INDEX = new AtomicInteger(0);
+  private static volatile int currentHostIndex = 0;
   private boolean debug = false;
 
   @Override
@@ -64,51 +64,59 @@ public class HraftdClient extends DB {
     }
   }
 
-  private String getNextHost() {
-    int index = HOST_INDEX.getAndIncrement() % hosts.length;
-    return hosts[index];
+  private String getCurrentHost() {
+    return hosts[currentHostIndex];
+  }
+
+  private void switchToNextHost() {
+    currentHostIndex = (currentHostIndex + 1) % hosts.length;
   }
 
   @Override
   public Status read(String table, String key, Set<String> fields, Map<String, ByteIterator> result) {
-    String urlString = getNextHost() + "/key/" + key;
-    if (debug) {
-      System.out.println("GET: " + urlString);
+    for (int attempts = 0; attempts < hosts.length; attempts++) {
+      String urlString = getCurrentHost() + "/key/" + key;
+      if (debug) {
+        System.out.println("GET: " + urlString);
+      }
+
+      try {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.setInstanceFollowRedirects(true);
+
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode == 200) {
+          try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+              response.append(line);
+            }
+
+            result.put("value", new StringByteIterator(response.toString()));
+            return Status.OK;
+          }
+        } else if (responseCode == 404) {
+          return Status.NOT_FOUND;
+        }
+
+        if (debug) {
+          System.err.println("Read failed with status code: " + responseCode + ", trying next host");
+        }
+      } catch (IOException e) {
+        if (debug) {
+          System.err.println("Read failed for " + urlString + " - " + e.getMessage() + ", trying next host");
+        }
+      }
+
+      // Try next host
+      switchToNextHost();
     }
 
-    try {
-      URL url = new URL(urlString);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setRequestMethod("GET");
-      connection.setInstanceFollowRedirects(true);
-      
-      int responseCode = connection.getResponseCode();
-      
-      if (responseCode == 200) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()))) {
-          StringBuilder response = new StringBuilder();
-          String line;
-          while ((line = reader.readLine()) != null) {
-            response.append(line);
-          }
-          
-          result.put("value", new StringByteIterator(response.toString()));
-          return Status.OK;
-        }
-      } else if (responseCode == 404) {
-        return Status.NOT_FOUND;
-      }
-      
-      if (debug) {
-        System.err.println("Read failed with status code: " + responseCode);
-      }
-      return Status.ERROR;
-    } catch (IOException e) {
-      if (debug) {
-        System.err.println("Read failed for " + urlString + " - " + e.getMessage());
-      }
-      return Status.ERROR;
-    }
+    return Status.ERROR;
   }
 
   @Override
@@ -123,84 +131,93 @@ public class HraftdClient extends DB {
 
   private Status writeKeyValue(String key, Map<String, ByteIterator> values) {
     String serializedValue = serializeFields(values);
-    
     String jsonBody = "{\"" + escapeJson(key) + "\":\"" + escapeJson(serializedValue) + "\"}";
-    
-    String urlString = getNextHost() + "/key";
-    
-    if (debug) {
-      System.out.println("POST: " + urlString + " Body: " + jsonBody);
-    }
 
-    try {
-      URL url = new URL(urlString);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setRequestMethod("POST");
-      connection.setRequestProperty("Content-Type", "application/json");
-      connection.setDoOutput(true);
-      connection.setInstanceFollowRedirects(true);
+    for (int attempts = 0; attempts < hosts.length; attempts++) {
+      String urlString = getCurrentHost() + "/key";
 
-      try (OutputStream os = connection.getOutputStream()) {
-        os.write(jsonBody.getBytes("UTF-8"));
-      }
-      
-      int responseCode = connection.getResponseCode();
-      
-      if (responseCode == 200) {
-        return Status.OK;
-      }
-      
       if (debug) {
-        try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-            responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream()))) {
-          StringBuilder response = new StringBuilder();
-          String line;
-          while ((line = reader.readLine()) != null) {
-            response.append(line);
+        System.out.println("POST: " + urlString + " Body: " + jsonBody);
+      }
+
+      try {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("POST");
+        connection.setRequestProperty("Content-Type", "application/json");
+        connection.setDoOutput(true);
+        connection.setInstanceFollowRedirects(true);
+
+        try (OutputStream os = connection.getOutputStream()) {
+          os.write(jsonBody.getBytes("UTF-8"));
+        }
+
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode == 200) {
+          return Status.OK;
+        }
+
+        if (debug) {
+          try (BufferedReader reader = new BufferedReader(new InputStreamReader(
+              responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream()))) {
+            StringBuilder response = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+              response.append(line);
+            }
+
+            System.err.println("Write failed with status code: " + responseCode +
+                              " Body: " + response.toString() + ", trying next host");
           }
-          
-          System.err.println("Write failed with status code: " + responseCode + 
-                            " Body: " + response.toString());
+        }
+      } catch (IOException e) {
+        if (debug) {
+          System.err.println("Write failed for " + urlString + " - " + e.getMessage() + ", trying next host");
         }
       }
-      return Status.ERROR;
-    } catch (IOException e) {
-      if (debug) {
-        System.err.println("Write failed for " + urlString + " - " + e.getMessage());
-      }
-      return Status.ERROR;
+
+      // Try next host
+      switchToNextHost();
     }
+
+    return Status.ERROR;
   }
 
   @Override
   public Status delete(String table, String key) {
-    String urlString = getNextHost() + "/key/" + key;
-    if (debug) {
-      System.out.println("DELETE: " + urlString);
+    for (int attempts = 0; attempts < hosts.length; attempts++) {
+      String urlString = getCurrentHost() + "/key/" + key;
+      if (debug) {
+        System.out.println("DELETE: " + urlString);
+      }
+
+      try {
+        URL url = new URL(urlString);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("DELETE");
+        connection.setInstanceFollowRedirects(true);
+
+        int responseCode = connection.getResponseCode();
+
+        if (responseCode == 200) {
+          return Status.OK;
+        }
+
+        if (debug) {
+          System.err.println("Delete failed with status code: " + responseCode + ", trying next host");
+        }
+      } catch (IOException e) {
+        if (debug) {
+          System.err.println("Delete failed for " + urlString + " - " + e.getMessage() + ", trying next host");
+        }
+      }
+
+      // Try next host
+      switchToNextHost();
     }
 
-    try {
-      URL url = new URL(urlString);
-      HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-      connection.setRequestMethod("DELETE");
-      connection.setInstanceFollowRedirects(true);
-      
-      int responseCode = connection.getResponseCode();
-      
-      if (responseCode == 200) {
-        return Status.OK;
-      }
-      
-      if (debug) {
-        System.err.println("Delete failed with status code: " + responseCode);
-      }
-      return Status.ERROR;
-    } catch (IOException e) {
-      if (debug) {
-        System.err.println("Delete failed for " + urlString + " - " + e.getMessage());
-      }
-      return Status.ERROR;
-    }
+    return Status.ERROR;
   }
 
   @Override
