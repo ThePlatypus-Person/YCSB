@@ -25,7 +25,12 @@ import site.ycsb.StringByteIterator;
 public class HraftdClient extends DB {
   private static final String HOSTS_PROPERTY = "hraftd.hosts";
   private static final String DEBUG_PROPERTY = "debug";
-  
+
+  // TCP connection establishment
+  private static final int CONNECT_TIMEOUT_MS = 2000;  // 2 seconds
+  // Timeout for waiting for response data
+  private static final int READ_TIMEOUT_MS = 3000; // 2 seconds
+
   private static final AtomicInteger THREAD_COUNT = new AtomicInteger(0);
   private static String[] hosts;
   private static volatile int currentHostIndex = 0;
@@ -42,6 +47,7 @@ public class HraftdClient extends DB {
         }
         hosts = hostsString.split(",");
         this.debug = props.getProperty(DEBUG_PROPERTY, "false").equals("true");
+        // this.debug = true;
         if (this.debug) {
           System.out.println("hraftd client initialized. Hosts: " + hostsString);
         }
@@ -85,6 +91,8 @@ public class HraftdClient extends DB {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("GET");
         connection.setInstanceFollowRedirects(true);
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(READ_TIMEOUT_MS);
 
         int responseCode = connection.getResponseCode();
 
@@ -147,9 +155,19 @@ public class HraftdClient extends DB {
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setDoOutput(true);
         connection.setInstanceFollowRedirects(true);
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(READ_TIMEOUT_MS);
+
+        if (debug) {
+          System.out.println("POST: About to get output stream for " + urlString);
+        }
 
         try (OutputStream os = connection.getOutputStream()) {
           os.write(jsonBody.getBytes("UTF-8"));
+        }
+
+        if (debug) {
+          System.out.println("POST: About to get response code for " + urlString);
         }
 
         int responseCode = connection.getResponseCode();
@@ -159,17 +177,7 @@ public class HraftdClient extends DB {
         }
 
         if (debug) {
-          try (BufferedReader reader = new BufferedReader(new InputStreamReader(
-              responseCode >= 400 ? connection.getErrorStream() : connection.getInputStream()))) {
-            StringBuilder response = new StringBuilder();
-            String line;
-            while ((line = reader.readLine()) != null) {
-              response.append(line);
-            }
-
-            System.err.println("Write failed with status code: " + responseCode +
-                              " Body: " + response.toString() + ", trying next host");
-          }
+          System.err.println("Write failed with status code: " + responseCode + ", trying next host");
         }
       } catch (IOException e) {
         if (debug) {
@@ -197,6 +205,8 @@ public class HraftdClient extends DB {
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
         connection.setRequestMethod("DELETE");
         connection.setInstanceFollowRedirects(true);
+        connection.setConnectTimeout(CONNECT_TIMEOUT_MS);
+        connection.setReadTimeout(READ_TIMEOUT_MS);
 
         int responseCode = connection.getResponseCode();
 
