@@ -17,24 +17,27 @@
 
 package site.ycsb.measurements;
 
-import site.ycsb.measurements.exporter.MeasurementsExporter;
-
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.Properties;
 import java.util.Vector;
 
+import site.ycsb.measurements.exporter.MeasurementsExporter;
+
 class SeriesUnit {
   /**
    * @param time
+   * @param operationCount
    * @param average
    */
-  public SeriesUnit(long time, double average) {
+  public SeriesUnit(long time, int operationCount, double average) {
     this.time = time;
+    this.operationCount = operationCount;
     this.average = average;
   }
 
   protected final long time;
+  protected final int operationCount;
   protected final double average;
 }
 
@@ -83,8 +86,8 @@ public class OneMeasurementTimeSeries extends OneMeasurement {
     long unit = ((now - start) / granularity) * granularity;
 
     if ((unit > currentunit) || (forceend)) {
-      double avg = ((double) sum) / ((double) count);
-      measurements.add(new SeriesUnit(currentunit, avg));
+      double avg = count > 0 ? ((double) sum) / ((double) count) : Double.NaN;
+      measurements.add(new SeriesUnit(currentunit, (int) count, avg));
 
       currentunit = unit;
 
@@ -126,8 +129,31 @@ public class OneMeasurementTimeSeries extends OneMeasurement {
     // TODO: 95th and 99th percentile latency
 
     exportStatusCounts(exporter);
-    for (SeriesUnit unit : measurements) {
-      exporter.write(getName(), Long.toString(unit.time), unit.average);
+
+    // Export all data including the empty one
+    if (!measurements.isEmpty()) {
+      java.util.Map<Long, SeriesUnit> timeToUnit = new java.util.HashMap<>();
+      for (SeriesUnit unit : measurements) {
+        timeToUnit.put(unit.time, unit);
+      }
+
+      // Find first and last timestamps
+      long firstTime = measurements.get(0).time;
+      long lastTime = measurements.get(measurements.size() - 1).time;
+
+      // Export all time windows from first to last
+      for (long t = firstTime; t <= lastTime; t += granularity) {
+        SeriesUnit unit = timeToUnit.get(t);
+        if (unit != null) {
+          // Window has data
+          exporter.write(getName(), t + "-ops", unit.operationCount);
+          exporter.write(getName(), Long.toString(t), unit.average);
+        } else {
+          // Missing window - zero operations completed
+          exporter.write(getName(), t + "-ops", 0);
+          exporter.write(getName(), Long.toString(t), Double.NaN);
+        }
+      }
     }
   }
 

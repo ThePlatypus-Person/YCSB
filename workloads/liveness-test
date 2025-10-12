@@ -26,13 +26,14 @@ operationcount=1000000000
 maxexecutiontime=30
 workload=site.ycsb.workloads.CoreWorkload
 
+target=200
 readallfields=true
 fieldcount=1
 
-readproportion=0.05
+readproportion=0.0
 updateproportion=0.0
 scanproportion=0
-insertproportion=0.95
+insertproportion=1.0
 
 requestdistribution=zipfian
 
