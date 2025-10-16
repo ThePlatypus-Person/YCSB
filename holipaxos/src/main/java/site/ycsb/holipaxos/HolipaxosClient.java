@@ -74,7 +74,7 @@ public class HolipaxosClient extends DB {
   @Override
   public Status read(String table, String key, Set<String> fields, 
                      Map<String, ByteIterator> result) {
-    System.out.println("read() called with key: " + key);
+    //System.out.println("read() called with key: " + key);
     try {
       String response = executeWithRetry("get " + key);
       
@@ -93,7 +93,7 @@ public class HolipaxosClient extends DB {
   
   @Override
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
-    System.out.println("insert() called with key: " + key);
+    //System.out.println("insert() called with key: " + key);
     StringBuilder value = new StringBuilder();
     for (ByteIterator v : values.values()) {
       // Don't add spaces between field values to avoid parser issues
@@ -112,13 +112,13 @@ public class HolipaxosClient extends DB {
   
   @Override
   public Status update(String table, String key, Map<String, ByteIterator> values) {
-    System.out.println("update() called with key: " + key);
+    //System.out.println("update() called with key: " + key);
     return insert(table, key, values);
   }
   
   @Override
   public Status delete(String table, String key) {
-    System.out.println("delete() called with key: " + key);
+    //System.out.println("delete() called with key: " + key);
     try {
       executeWriteWithRetry("del " + key);
       return Status.OK;
@@ -215,8 +215,8 @@ public class HolipaxosClient extends DB {
   }
   
   private String execute(String command) throws Exception {
-    out.println(command);
-    out.flush();
+    //out.println(command);
+    //out.flush();
     
     String response = in.readLine();
     if (response == null) {
@@ -247,8 +247,8 @@ public class HolipaxosClient extends DB {
     
     try {
       socket.setSoTimeout(500);
-      out.println(command);
-      out.flush();
+      //out.println(command);
+      //out.flush();
       
       try {
         String response = in.readLine();

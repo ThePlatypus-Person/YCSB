@@ -29,7 +29,7 @@ public class RestKVClient extends DB {
 
     try {
       URI uri = URI.create(String.format("%s/api/kv/%s", endpoint, key));
-      System.out.printf("Read %s\n", uri.toURL());
+      //System.out.printf("Read %s\n", uri.toURL());
       conn = (HttpURLConnection) uri.toURL().openConnection();
       conn.setRequestMethod("GET");
       conn.setRequestProperty("XDN", "restkv");
@@ -91,7 +91,7 @@ public class RestKVClient extends DB {
       String jsonBody = objectMapper.writeValueAsString(body);
       output = jsonBody;
 
-      System.out.printf("Insert %s: %s\n", url, jsonBody);
+      //System.out.printf("Insert %s: %s\n", url, jsonBody);
       try (OutputStream os = conn.getOutputStream()) {
         os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
         os.flush();
@@ -113,7 +113,7 @@ public class RestKVClient extends DB {
   public Status delete(String table, String key) {
     try {
       URL url = URI.create(String.format("%s/api/kv/%s", endpoint, key)).toURL();
-      System.out.printf("Delete %s\n", url);
+      //System.out.printf("Delete %s\n", url);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("DELETE");
       conn.setRequestProperty("XDN", "restkv");
@@ -148,7 +148,7 @@ public class RestKVClient extends DB {
       body.put("value", encoded);
       String jsonBody = objectMapper.writeValueAsString(body);
 
-      System.out.printf("Update %s: %s\n", url, jsonBody);
+      //System.out.printf("Update %s: %s\n", url, jsonBody);
       try (OutputStream os = conn.getOutputStream()) {
         os.write(jsonBody.getBytes(StandardCharsets.UTF_8));
         os.flush();
@@ -167,7 +167,6 @@ public class RestKVClient extends DB {
   @Override
   public Status scan(String table, String startKey, int recordCount,
     Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
-    System.out.println("WARN: scan() is not implemented");
-    return Status.OK;
+    return Status.NOT_IMPLEMENTED;
   }
 }

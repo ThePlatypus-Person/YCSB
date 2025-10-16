@@ -42,10 +42,10 @@ public class TikvClient extends DB {
       Optional<ByteString> valueOpt = client.get(ByteString.copyFromUtf8(key));
 
       if (valueOpt.isPresent()) {
-        System.out.printf("Read key %s = %s\n", key, valueOpt.get().toStringUtf8());
+        //System.out.printf("Read key %s = %s\n", key, valueOpt.get().toStringUtf8());
         return Status.OK;
       } else {
-        System.out.printf("Read key %s FAIL\n", key);
+        //System.out.printf("Read key %s FAIL\n", key);
         return Status.ERROR;
       }
 
@@ -60,7 +60,7 @@ public class TikvClient extends DB {
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
     try {
       String value = values.toString();
-      System.out.printf("Insert key %s = %s\n", key, value);
+      //System.out.printf("Insert key %s = %s\n", key, value);
       client.put(ByteString.copyFromUtf8(key), ByteString.copyFromUtf8(value));
       return Status.OK;
 
@@ -73,7 +73,7 @@ public class TikvClient extends DB {
   @Override
   public Status delete(String table, String key) {
     try {
-      System.out.printf("DELETE key %s\n", key);
+      //System.out.printf("DELETE key %s\n", key);
       client.delete(ByteString.copyFromUtf8(key));
       return Status.OK;
 
@@ -87,7 +87,7 @@ public class TikvClient extends DB {
   public Status update(String table, String key, Map<String, ByteIterator> values) {
     try {
       String value = values.toString();
-      System.out.printf("Update key %s = %s\n", key, value);
+      //System.out.printf("Update key %s = %s\n", key, value);
       client.put(ByteString.copyFromUtf8(key), ByteString.copyFromUtf8(value));
       return Status.OK;
 
@@ -101,7 +101,7 @@ public class TikvClient extends DB {
   public Status scan(String table, String startKey, int recordCount,
     Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
     System.out.println("ERROR: scan() is not implemented");
-    return Status.ERROR;
+    return Status.NOT_IMPLEMENTED;
   }
 
   @Override

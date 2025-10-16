@@ -32,7 +32,7 @@ public class PaxiClient extends DB {
     try {
       //URI uri = URI.create(buildKey(table, numericKey));
       URI uri = URI.create(endpoint + "/" + numericKey);
-      System.out.printf("Read %s\n", uri.toURL());
+      //System.out.printf("Read %s\n", uri.toURL());
       conn = (HttpURLConnection) uri.toURL().openConnection();
       conn.setRequestMethod("GET");
 
@@ -92,7 +92,7 @@ public class PaxiClient extends DB {
       String value = byteIterator.toString();
       */
       String value = values.toString();
-      System.out.printf("Insert %s: %s\n", url, value);
+      //System.out.printf("Insert %s: %s\n", url, value);
       try (OutputStream os = conn.getOutputStream()) {
         os.write(value.getBytes());
         os.flush();
@@ -114,7 +114,7 @@ public class PaxiClient extends DB {
     try {
       //URL url = URI.create(buildKey(table, numericKey)).toURL();
       URL url = URI.create(endpoint + "/" + numericKey).toURL();
-      System.out.printf("Delete %s\n", url);
+      //System.out.printf("Delete %s\n", url);
       HttpURLConnection conn = (HttpURLConnection) url.openConnection();
       conn.setRequestMethod("POST");
       conn.setDoOutput(true);
@@ -157,7 +157,7 @@ public class PaxiClient extends DB {
       String value = byteIterator.toString();
       */
       String value = values.toString();
-      System.out.printf("Update %s: %s\n", url, value);
+      //System.out.printf("Update %s: %s\n", url, value);
       try (OutputStream os = conn.getOutputStream()) {
         os.write(value.getBytes());
         os.flush();
@@ -175,7 +175,6 @@ public class PaxiClient extends DB {
   @Override
   public Status scan(String table, String startKey, int recordCount,
     Set<String> fields, Vector<HashMap<String, ByteIterator>> result) {
-    System.out.println("WARN: scan() is not implemented");
-    return Status.OK;
+    return Status.NOT_IMPLEMENTED;
   }
 }
