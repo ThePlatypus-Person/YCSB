@@ -30,7 +30,7 @@ public class HolipaxosClient extends DB {
   
   private static final String HOSTS_PROPERTY = "holipaxos.hosts";
   private static final String DEFAULT_HOSTS = "127.0.0.1:2001,127.0.0.1:2211,127.0.0.1:2221";
-  private static final String TIMEOUT_PROPERTY = "holipaxos.timeout";
+  private static final String TIMEOUT_PROPERTY = "holipaxos.timeut";
   private static final int DEFAULT_TIMEOUT_MS = 5000;
   
   private String[] hosts;
@@ -215,8 +215,8 @@ public class HolipaxosClient extends DB {
   }
   
   private String execute(String command) throws Exception {
-    //out.println(command);
-    //out.flush();
+    out.println(command);
+    out.flush();
     
     String response = in.readLine();
     if (response == null) {
@@ -247,8 +247,8 @@ public class HolipaxosClient extends DB {
     
     try {
       socket.setSoTimeout(500);
-      //out.println(command);
-      //out.flush();
+      out.println(command);
+      out.flush();
       
       try {
         String response = in.readLine();
