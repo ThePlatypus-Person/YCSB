@@ -15,7 +15,7 @@
  * LICENSE file.
  */
 
-package site.ycsb.webservice.paxi;
+package site.ycsb.webservice.xdn;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -30,6 +30,7 @@ import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 
 import javax.ws.rs.HttpMethod;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
@@ -57,7 +58,7 @@ import site.ycsb.StringByteIterator;
  * and provides better functionality. For example HttpClient can automatically
  * handle redirects and proxy authentication which the standard Java API can't.
  */
-public class RestClient extends DB {
+public class XdnRestKVClient extends DB {
 
   private static final String URL_PREFIX = "url.prefix";
   private static final String CON_TIMEOUT = "timeout.con";
@@ -102,17 +103,15 @@ public class RestClient extends DB {
 
   @Override
   public Status read(String table, String key, Set<String> fields, Map<String, ByteIterator> result) {
-    String numericKey = key.replace("user", "");
-    String endpoint = "/" + numericKey;
-
     int responseCode;
+
     try {
-      responseCode = httpGet(urlPrefix + endpoint, result);
+      responseCode = httpGet(urlPrefix + key, result);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + endpoint, HttpMethod.GET);
+      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.GET);
     }
     if (logEnabled) {
-      System.err.println(new StringBuilder("GET Request: ").append(urlPrefix).append(endpoint)
+      System.err.println(new StringBuilder("GET Request: ").append(urlPrefix).append(key)
             .append(" | Response Code: ").append(responseCode).toString());
     }
     return getStatus(responseCode);
@@ -120,35 +119,39 @@ public class RestClient extends DB {
 
   @Override
   public Status insert(String table, String key, Map<String, ByteIterator> values) {
-    String numericKey = key.replace("user", "");
-    String endpoint = "/" + numericKey;
-
     int responseCode;
+
     try {
-      responseCode = httpExecute(new HttpPost(urlPrefix + endpoint), values.toString());
+      ObjectMapper mapper = new ObjectMapper();
+
+      // Create a Map for the JSON body
+      Map<String, String> jsonBody = new HashMap<>();
+      jsonBody.put("key", key);
+      jsonBody.put("value", values.toString());
+
+      // Convert the Map to a JSON string with escaping handled automatically
+      String body = mapper.writeValueAsString(jsonBody);
+      responseCode = httpExecute(new HttpPost(urlPrefix + key), body);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + endpoint, HttpMethod.POST);
+      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.POST);
     }
     if (logEnabled) {
-      System.err.println(new StringBuilder("POST Request: ").append(urlPrefix).append(endpoint)
-            .append(" | Response Code: ").append(responseCode).toString());
+      System.err.println(new StringBuilder("POST Request: ").append(urlPrefix).append(key)
+          .append(" | Response Code: ").append(responseCode).toString());
     }
     return getStatus(responseCode);
   }
 
   @Override
   public Status delete(String table, String key) {
-    String numericKey = key.replace("user", "");
-    String endpoint = "/" + numericKey;
-
     int responseCode;
     try {
-      responseCode = httpExecute(new HttpPost(urlPrefix + endpoint), "");
+      responseCode = httpDelete(urlPrefix + key);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + endpoint, HttpMethod.POST);
+      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.DELETE);
     }
     if (logEnabled) {
-      System.err.println(new StringBuilder("POST Request: ").append(urlPrefix).append(endpoint)
+      System.err.println(new StringBuilder("DELETE Request: ").append(urlPrefix).append(key)
             .append(" | Response Code: ").append(responseCode).toString());
     }
     return getStatus(responseCode);
@@ -156,17 +159,24 @@ public class RestClient extends DB {
 
   @Override
   public Status update(String table, String key, Map<String, ByteIterator> values) {
-    String numericKey = key.replace("user", "");
-    String endpoint = "/" + numericKey;
-
     int responseCode;
+
     try {
-      responseCode = httpExecute(new HttpPost(urlPrefix + endpoint), values.toString());
+      ObjectMapper mapper = new ObjectMapper();
+
+      // Create a Map for the JSON body
+      Map<String, String> jsonBody = new HashMap<>();
+      jsonBody.put("key", key);
+      jsonBody.put("value", values.toString());
+
+      // Convert the Map to a JSON string with escaping handled automatically
+      String body = mapper.writeValueAsString(jsonBody);
+      responseCode = httpExecute(new HttpPost(urlPrefix + key), body);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + endpoint, HttpMethod.POST);
+      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.POST);
     }
     if (logEnabled) {
-      System.err.println(new StringBuilder("POST Request: ").append(urlPrefix).append(endpoint)
+      System.err.println(new StringBuilder("POST Request: ").append(urlPrefix).append(key)
             .append(" | Response Code: ").append(responseCode).toString());
     }
     return getStatus(responseCode);
@@ -266,8 +276,11 @@ public class RestClient extends DB {
     for (int i = 0; i < headers.length; i = i + 2) {
       request.setHeader(headers[i], headers[i + 1]);
     }
-    InputStreamEntity reqEntity = new InputStreamEntity(new ByteArrayInputStream(data.getBytes()),
-          ContentType.APPLICATION_FORM_URLENCODED);
+    request.setHeader("Content-Type", "application/json");
+    InputStreamEntity reqEntity = new InputStreamEntity(
+        new ByteArrayInputStream(data.getBytes()),
+        ContentType.create("application/json", "UTF-8")
+    );
     reqEntity.setChunked(true);
     request.setEntity(reqEntity);
     CloseableHttpResponse response = client.execute(request);

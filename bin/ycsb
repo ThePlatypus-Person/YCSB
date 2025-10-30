@@ -110,10 +110,10 @@ DATABASES = {
 }
  '''
 DATABASES = {
-    "paxi"          : "site.ycsb.webservice.paxi.RestClient",
+    "paxi"          : "site.ycsb.webservice.paxi.PaxiRestClient",
     "zookeeper"     : "site.ycsb.db.zookeeper.ZKClient",
     "hraftd"        : "site.ycsb.db.HraftdClient",
-    "xdn"           : "site.ycsb.restkv.RestKVClient",
+    "xdn"           : "site.ycsb.webservice.xdn.XdnRestKVClient",
     "tikv"          : "site.ycsb.tikv.TikvClient",
     "etcd"          : "site.ycsb.etcd.EtcdClient",
     "holipaxos"     : "site.ycsb.holipaxos.HolipaxosClient",

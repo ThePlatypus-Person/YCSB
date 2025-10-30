@@ -158,7 +158,6 @@ LICENSE file.
     <zookeeper.version>3.5.8</zookeeper.version>
     <paxi.version>1.0.0</paxi.version>
     <holipaxos.version>1.0.0</holipaxos.version>
-    <xdn.version>1.0.0</xdn.version>
   </properties>
 
   <modules>
