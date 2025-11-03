@@ -73,18 +73,18 @@ public class XdnRestKVClient extends DB {
   private Properties props;
   private String[] headers;
   private CloseableHttpClient client;
-  private int conTimeout = 10000;
-  private int readTimeout = 10000;
-  private int execTimeout = 10000;
+  private int conTimeout = 1000;
+  private int readTimeout = 1000;
+  private int execTimeout = 1000;
   private volatile Criteria requestTimedout = new Criteria(false);
 
   @Override
   public void init() throws DBException {
     props = getProperties();
     urlPrefix = props.getProperty(URL_PREFIX, "http://127.0.0.1:8080");
-    conTimeout = Integer.valueOf(props.getProperty(CON_TIMEOUT, "10")) * 1000;
-    readTimeout = Integer.valueOf(props.getProperty(READ_TIMEOUT, "10")) * 1000;
-    execTimeout = Integer.valueOf(props.getProperty(EXEC_TIMEOUT, "10")) * 1000;
+    conTimeout = Integer.valueOf(props.getProperty(CON_TIMEOUT, "10")) * 100;
+    readTimeout = Integer.valueOf(props.getProperty(READ_TIMEOUT, "10")) * 100;
+    execTimeout = Integer.valueOf(props.getProperty(EXEC_TIMEOUT, "10")) * 100;
     logEnabled = Boolean.valueOf(props.getProperty(LOG_ENABLED, "false").trim());
     compressedResponse = Boolean.valueOf(props.getProperty(COMPRESSED_RESPONSE, "false").trim());
     headers = props.getProperty(HEADERS, "Accept */* Content-Type application/xml user-agent Mozilla/5.0 ").trim()
