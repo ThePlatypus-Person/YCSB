@@ -106,9 +106,10 @@ public class XdnRestKVClient extends DB {
     int responseCode;
 
     try {
-      responseCode = httpGet(urlPrefix + key, result);
+      //responseCode = httpGet(urlPrefix + key, result);
+      responseCode = httpGet(urlPrefix + "/" + key, result);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.GET);
+      responseCode = handleExceptions(e, urlPrefix + "/" + key, HttpMethod.GET);
     }
     if (logEnabled) {
       System.err.println(new StringBuilder("GET Request: ").append(urlPrefix).append(key)
@@ -126,12 +127,16 @@ public class XdnRestKVClient extends DB {
 
       // Create a Map for the JSON body
       Map<String, String> jsonBody = new HashMap<>();
+      jsonBody.put("item", key);
+      /*
       jsonBody.put("key", key);
       jsonBody.put("value", values.toString());
+      */
 
       // Convert the Map to a JSON string with escaping handled automatically
       String body = mapper.writeValueAsString(jsonBody);
-      responseCode = httpExecute(new HttpPost(urlPrefix + key), body);
+      //responseCode = httpExecute(new HttpPost(urlPrefix + key), body);
+      responseCode = httpExecute(new HttpPost(urlPrefix), body);
     } catch (Exception e) {
       responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.POST);
     }
@@ -166,12 +171,15 @@ public class XdnRestKVClient extends DB {
 
       // Create a Map for the JSON body
       Map<String, String> jsonBody = new HashMap<>();
+      jsonBody.put("item", key);
+      /*
       jsonBody.put("key", key);
       jsonBody.put("value", values.toString());
+      */
 
       // Convert the Map to a JSON string with escaping handled automatically
       String body = mapper.writeValueAsString(jsonBody);
-      responseCode = httpExecute(new HttpPost(urlPrefix + key), body);
+      responseCode = httpExecute(new HttpPost(urlPrefix), body);
     } catch (Exception e) {
       responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.POST);
     }
