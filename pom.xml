@@ -170,7 +170,8 @@ LICENSE file.
     <module>hraftd</module>
     <module>holipaxos</module>
     <module>tikv</module>
-    <module>xdn</module>
+    <module>todo</module>
+    <module>restkv</module>
     <module>zookeeper</module>
     <module>etcd</module>
   </modules>

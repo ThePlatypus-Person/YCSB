@@ -18,8 +18,8 @@
     <relativePath>../binding-parent</relativePath>
   </parent>
 
-  <artifactId>xdn-binding</artifactId>
-  <name>XDN Client Binding</name>
+  <artifactId>todo-binding</artifactId>
+  <name>Todo Client Binding</name>
   <packaging>jar</packaging>
 
   <properties>

@@ -15,7 +15,7 @@
  * LICENSE file.
  */
 
-package site.ycsb.webservice.xdn;
+package site.ycsb.webservice.todo;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
@@ -58,7 +58,7 @@ import site.ycsb.StringByteIterator;
  * and provides better functionality. For example HttpClient can automatically
  * handle redirects and proxy authentication which the standard Java API can't.
  */
-public class XdnRestKVClient extends DB {
+public class TodoClient extends DB {
 
   private static final String URL_PREFIX = "url.prefix";
   private static final String CON_TIMEOUT = "timeout.con";

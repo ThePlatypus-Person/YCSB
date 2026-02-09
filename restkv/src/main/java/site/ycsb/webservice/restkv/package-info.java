@@ -18,5 +18,4 @@
 /**
  * YCSB binding for RESTFul Web Services.
  */
-package site.ycsb.webservice.xdn;
-
+package site.ycsb.webservice.restkv;
