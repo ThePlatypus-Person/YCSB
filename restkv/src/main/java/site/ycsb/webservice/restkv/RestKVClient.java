@@ -132,8 +132,7 @@ public class RestKVClient extends DB {
 
       // Convert the Map to a JSON string with escaping handled automatically
       String body = mapper.writeValueAsString(jsonBody);
-      //responseCode = httpExecute(new HttpPost(urlPrefix + key), body);
-      responseCode = httpExecute(new HttpPost(urlPrefix), body);
+      responseCode = httpExecute(new HttpPost(urlPrefix + "/" + key), body);
     } catch (Exception e) {
       responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.POST);
     }
@@ -150,7 +149,7 @@ public class RestKVClient extends DB {
     try {
       responseCode = httpDelete(urlPrefix + key);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.DELETE);
+      responseCode = handleExceptions(e, urlPrefix + "/" + key, HttpMethod.DELETE);
     }
     if (logEnabled) {
       System.err.println(new StringBuilder("DELETE Request: ").append(urlPrefix).append(key)
@@ -173,9 +172,10 @@ public class RestKVClient extends DB {
 
       // Convert the Map to a JSON string with escaping handled automatically
       String body = mapper.writeValueAsString(jsonBody);
-      responseCode = httpExecute(new HttpPost(urlPrefix), body);
+
+      responseCode = httpExecute(new HttpPost(urlPrefix + "/" + key), body);
     } catch (Exception e) {
-      responseCode = handleExceptions(e, urlPrefix + key, HttpMethod.POST);
+      responseCode = handleExceptions(e, urlPrefix + "/" + key, HttpMethod.POST);
     }
     if (logEnabled) {
       System.err.println(new StringBuilder("POST Request: ").append(urlPrefix).append(key)
